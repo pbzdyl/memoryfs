@@ -29,7 +29,7 @@ class MemoryFileSystem(override val provider: MemoryFileSystemProvider, uri: URI
 	override def getUserPrincipalLookupService(): UserPrincipalLookupService = MemoryFSUserPrincipalLookupService
 	override def getSeparator(): String = "/"
 	
-	override def close() = rootNode.entries.clear()
+	override def close() = rootNode.clear()
 	
 	override def getPathMatcher(syntaxAndPattern: String): PathMatcher = throw new UnsupportedOperationException
 	override def newWatchService(): WatchService = throw new UnsupportedOperationException
@@ -56,7 +56,7 @@ class MemoryFileSystem(override val provider: MemoryFileSystemProvider, uri: URI
 	
 	def newDirectoryStream(dir: Path, filter: DirectoryStream.Filter[_ >: Path]): DirectoryStream[Path] =
 	  locateNode(dir) match {
-	  case Some(node: Directory) => new MemoryFSDirectoryStream(node.entries)
+	  case Some(node: Directory) => new MemoryFSDirectoryStream(node)
 	  case Some(_) => throw new NotDirectoryException(dir.toString())
 	  case None => throw new NoSuchFileException(dir.toString())
 	}
