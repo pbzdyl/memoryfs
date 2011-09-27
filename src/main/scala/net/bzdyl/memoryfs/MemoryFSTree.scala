@@ -28,6 +28,25 @@ class FileData extends mutable.ArrayBuffer[Byte] with ReadWriteLockBuffer[Byte] 
 	    readCount
     }
   }
+  
+  def write(fromPosition: Long, src: ByteBuffer): Int = withWriteLock {
+    for (i <- this.size until fromPosition.toInt) {
+      this += 0
+    }
+    
+    val writtenCount = src.remaining()
+    
+    val range = this.indices.drop(fromPosition.toInt)
+    for (i <- range if src.hasRemaining()) {
+      this(i) = src.get()
+    }
+    
+    while (src.hasRemaining()) {
+      this += src.get()
+    }
+    
+    writtenCount
+  }
 }
 
 class DirectoryEntries extends mutable.HashSet[Node] with mutable.SynchronizedSet[Node]

@@ -4,22 +4,22 @@ import java.nio.channels.SeekableByteChannel
 import java.nio.ByteBuffer
 import java.nio.channels.ClosedChannelException
 
-class NodeSeekableByteChannel(val file: FileData) extends SeekableByteChannel {
-	@volatile private[this] var open = true
-	@volatile private[this] var position: Long = 0
+class FileDataSeekableByteChannel(val file: FileData) extends SeekableByteChannel {
+	private[this] var open = true
+	private[this] var position: Long = 0
 	
-	def truncate(size: Long) = {
+	def truncate(size: Long) = synchronized {
 	  checkOpen()
 	  file.truncate(size)
 	  this
 	}
 	
-	def size(): Long = {
+	def size(): Long = synchronized {
 	  checkOpen()
 	  file.size
 	}
 	
-	def position(newPosition: Long) = {
+	def position(newPosition: Long) = synchronized {
 	  checkOpen()
 	  if (newPosition < 0) {
 	    throw new IllegalArgumentException("position cannot be negative: " + newPosition)
@@ -28,17 +28,19 @@ class NodeSeekableByteChannel(val file: FileData) extends SeekableByteChannel {
 	  this
 	}
 	
-	def position(): Long = {
+	def position(): Long = synchronized {
 	  checkOpen()
 	  position
 	}
 	
-	def write(src: ByteBuffer): Int = {
+	def write(src: ByteBuffer): Int = synchronized {
 	  checkOpen()
-	  0
+	  val bytesWritten = file.write(position, src)
+	  position += bytesWritten
+	  bytesWritten
 	}
 	
-	def read(dst: ByteBuffer): Int = {
+	def read(dst: ByteBuffer): Int = synchronized {
 	  checkOpen()
 	  val bytesRead = file.read(position, dst)
 	  if (bytesRead > 0) position += bytesRead
@@ -49,7 +51,7 @@ class NodeSeekableByteChannel(val file: FileData) extends SeekableByteChannel {
 	  open = false
 	}
 	
-	def isOpen(): Boolean = open
+	def isOpen(): Boolean = synchronized { open }
 	
-	private def checkOpen() = if (!open) throw new ClosedChannelException
+	private def checkOpen() = synchronized { if (!open) throw new ClosedChannelException }
 }
