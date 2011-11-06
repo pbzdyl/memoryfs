@@ -29,6 +29,8 @@ class FileData extends mutable.ArrayBuffer[Byte] with ReadWriteLockBuffer[Byte] 
     }
   }
   
+  def append(src: ByteBuffer): (Int, Int) = withWriteLock { (write(size, src), size) }
+  
   def write(fromPosition: Long, src: ByteBuffer): Int = withWriteLock {
     for (i <- this.size until fromPosition.toInt) {
       this += 0
@@ -55,7 +57,7 @@ sealed trait Node {
   val filesystem: MemoryFileSystem
   val parent: Option[Directory]
   val name: String
-  def toPath(): ResolvedPath = {
+  def toPath(): ResolvedMFSPath = {
     def buildPath(n: Option[Node], buffer: List[Node]): String = {
       n match {
         case Some(node) => buildPath(node.parent, node :: buffer)
@@ -63,7 +65,7 @@ sealed trait Node {
       }
     }
     val stringPath = buildPath(Some(this), Nil)
-    new ResolvedPath(filesystem, stringPath, this)
+    new ResolvedMFSPath(this, filesystem, stringPath)
   }
 }
 
@@ -73,7 +75,35 @@ with Node
 
 class Directory(val filesystem: MemoryFileSystem, val parent: Option[Directory], val name: String)
 extends DirectoryEntries
-with Node
+with Node {
+  def createNewFile(name: String): Option[File] = synchronized {
+    if (!contains(name)) {
+    	val newFile = new File(filesystem, Some(this), name)
+    	add(newFile)
+    	Some(newFile)
+    } else {
+      None
+    }
+  }
+  
+  def contains(name: String): Boolean = synchronized {
+    locate(name).isDefined
+  }
+  
+  def locate(name: String): Option[Node] = {
+    find(n => n.name == name)
+  }
+  
+  def createOrExisting(name: String): Node = synchronized {
+    locate(name) match {
+      case Some(node) => node
+      case None =>
+        val newFile = new File(filesystem, Some(this), name)
+        add(newFile)
+        newFile
+    }
+  }
+}
 
 class SymLink(val filesystem: MemoryFileSystem, val parent: Option[Directory], val name: String, val target: Node)
 extends Node

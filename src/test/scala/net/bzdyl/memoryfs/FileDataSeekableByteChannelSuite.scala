@@ -8,11 +8,12 @@ import scala.collection.mutable.ArrayBuffer
 import org.scalatest.junit.JUnitSuite
 import org.scalatest.mock.MockitoSugar
 import TestConversions._
+import WriteMode._
 
 class NodeSeekableByteSuite extends JUnitSuite with MockitoSugar {
   @Test
   def testCloseBehavior() {
-    val ch = new FileDataSeekableByteChannel(new FileData)
+    val ch = new FileDataSeekableByteChannel(new FileData(), Write, true)
 
     assert(ch.isOpen())
     ch.close()
@@ -142,7 +143,7 @@ class NodeSeekableByteSuite extends JUnitSuite with MockitoSugar {
     val fileData = new FileData
     val src: ByteBuffer = testData
     src.flip()
-    val ch = new FileDataSeekableByteChannel(fileData)
+    val ch = new FileDataSeekableByteChannel(fileData, Write, false)
     
     assert(ch.write(src) === testData.size)
     
@@ -158,7 +159,7 @@ class NodeSeekableByteSuite extends JUnitSuite with MockitoSugar {
     val fileData = new FileData ++= initialData
     val src: ByteBuffer = testData
     src.flip()
-    val ch = new FileDataSeekableByteChannel(fileData)
+    val ch = new FileDataSeekableByteChannel(fileData, Write, false)
     
     ch.position(4)
     assert(ch.position() === position)
@@ -170,7 +171,7 @@ class NodeSeekableByteSuite extends JUnitSuite with MockitoSugar {
   def testPositionNotIncrementedWhenNoDataWritten() {
     val testData = testBytes("abcxyz")
     val fileData = new FileData
-    val ch = new FileDataSeekableByteChannel(fileData)
+    val ch = new FileDataSeekableByteChannel(fileData, Write, false)
     val src = ByteBuffer.allocate(1)
     src.flip()
     
@@ -187,7 +188,7 @@ class NodeSeekableByteSuite extends JUnitSuite with MockitoSugar {
     val src: ByteBuffer = testData
     src.flip()
     val fd = new FileData
-    val ch = new FileDataSeekableByteChannel(fd)
+    val ch = new FileDataSeekableByteChannel(fd, Write, false)
     
     ch.position(position)
     assert(ch.write(src) === testData.size)

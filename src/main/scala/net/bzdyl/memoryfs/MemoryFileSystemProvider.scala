@@ -48,7 +48,7 @@ class MemoryFileSystemProvider extends FileSystemProvider {
 
 	override def newFileSystem(uri: URI, env: java.util.Map[String, _]): FileSystem = null
 	override def getFileStore(path: Path): FileStore = null
-	override def getFileSystem(uri: java.net.URI): FileSystem = null
+	override def getFileSystem(uri: java.net.URI): MemoryFileSystem = new MemoryFileSystem(this, uri, null)
 	override def getPath(uri: java.net.URI): Path = null
 	override val getScheme = "memory"
 	

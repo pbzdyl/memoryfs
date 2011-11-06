@@ -3,8 +3,8 @@ import java.nio.file.ProviderMismatchException
 import java.nio.file.Path
 
 object Conversions {
-  implicit def pathToMemoryFSPath(path: Path): MemoryFSPath = path match {
-    case memoryFSPath: MemoryFSPath => memoryFSPath
+  implicit def pathToMemoryFSPath(path: Path): MFSPath = path match {
+    case mfsPath: MFSPath => mfsPath
     case _ => throw new ProviderMismatchException
   }
 }
