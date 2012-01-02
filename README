@@ -1,0 +1,3 @@
+Simple implementation of the memory filesystem for the Java 7 NIO Filesystem API.
+
+I created this project to learn Scala and its interoperability with Java APIs as well as new Java 7 NIO Filesystem API.
