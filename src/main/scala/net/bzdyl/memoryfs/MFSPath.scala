@@ -23,6 +23,10 @@ class MFSPath(val filesystem: MemoryFileSystem, stringPath: String*) extends Pat
   val isAbsolute: Boolean = stringPath(0).startsWith("/")
   val isRelative: Boolean = !isAbsolute
   val isEmpty: Boolean = isRelative && pathElements.isEmpty
+  val isHidden = pathElements.lastOption match {
+    case Some(name) => name.startsWith(".")
+    case _ => false
+  }
 
   def getName(pos: Int): MFSPath =
     if (pathElements.isDefinedAt(pos))
@@ -44,11 +48,16 @@ class MFSPath(val filesystem: MemoryFileSystem, stringPath: String*) extends Pat
     else
       null
 
-  def getFileName(): MFSPath =
+  lazy val filename =
     if (pathElements.nonEmpty)
-      new MFSPath(filesystem, pathElements.last)
+      Some(new MFSPath(filesystem, pathElements.last))
     else
-      null
+      None
+      
+  def getFileName(): MFSPath = filename match {
+      case Some(p) => p
+      case None    => null
+    }
 
   def getParent(): MFSPath = {
     if (pathElements.nonEmpty) {

@@ -11,9 +11,14 @@ class MemoryFileSystemProvider extends FileSystemProvider {
 	/* delegate data store specific operations to the filesystem instances */
 	override def checkAccess(path: Path, modes: AccessMode*) {}
 	
-	override def copy(source: Path, target: Path, options: CopyOption*) {} 
+	override def copy(source: Path, target: Path, options: CopyOption*) =
+	  source.filesystem.copy(source, target, options: _*)
 	
-	override def createDirectory(dir: Path, attrs: FileAttribute[_]*) {}
+	override def move(source: Path, target: Path, options: CopyOption*) =
+	  source.filesystem.move(source, target, options: _*)
+	
+	override def createDirectory(dir: Path, attrs: FileAttribute[_]*) =
+	  dir.filesystem.createDirectory(dir, attrs: _*)
 	
 	override def delete(path: Path) = path.filesystem.delete(path)
 	
@@ -21,14 +26,10 @@ class MemoryFileSystemProvider extends FileSystemProvider {
 	  Files.getFileAttributeView(path, t)
 	}
 	
-	override def isHidden(path: Path) =
-	  path.filesystem.isHidden(path)
+	override def isHidden(path: Path) = path.isHidden
 	
 	override def isSameFile(path: Path, path2: Path) =
 	  path.filesystem.isSameFile(path, path2)
-	
-	override def move(source: Path, target: Path, options: CopyOption*) =
-	  source.filesystem.move(source, target, options: _*)
 	
 	override def setAttribute(path: Path, attribute: String, value: Any, options: LinkOption*) =
 	  path.filesystem.setAttribute(path, attribute, value, options: _*)

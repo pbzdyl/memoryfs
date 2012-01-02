@@ -8,15 +8,7 @@ import java.nio.file.OpenOption
 import java.nio.channels.NonWritableChannelException
 import java.nio.channels.NonReadableChannelException
 
-object WriteMode extends Enumeration {
-  type WriteMode = Value
-  val DontWrite, Write, Append = Value
-  def isModifying(mode: WriteMode) = mode match {
-    case DontWrite => false
-    case Write     => true
-    case Append    => true
-  }
-}
+
 
 import WriteMode._
 

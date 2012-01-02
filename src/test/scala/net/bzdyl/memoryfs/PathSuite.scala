@@ -39,7 +39,7 @@ class PathSuite extends JUnitSuite {
     
     assert(abs.toAbsolutePath() eq abs)
     
-    fs.currentDir = fs.root
+    fs.currentDir = fs.rootPath
     
     val rel1 = path("a/b/c")
     

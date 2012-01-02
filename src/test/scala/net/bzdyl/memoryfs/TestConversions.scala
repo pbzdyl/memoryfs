@@ -25,4 +25,6 @@ object TestConversions {
 	  src.foreach(b => dst.put(b))
 	  dst
 	}
+	
+	def newTestFS() = new MemoryFileSystemProvider().getFileSystem(null)
 }
